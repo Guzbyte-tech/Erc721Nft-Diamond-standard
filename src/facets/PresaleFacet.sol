@@ -10,35 +10,21 @@ contract PresaleFacet {
         uint256 _minPurchase,
         uint256 _maxPurchase
     ) external {
-        LibDiamond.DiamondStorage storage libStorage = LibDiamond
-            .diamondStorage();
-        libStorage.presalePrice = _price;
-        libStorage.minPurchase = _minPurchase;
-        libStorage.maxPurchase = _maxPurchase;
+        LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
+        ds.presalePrice = _price;
+        ds.minPurchase = _minPurchase;
+        ds.maxPurchase = _maxPurchase;
     }
 
     function buyPresale(uint256 _amount) external payable {
-        LibDiamond.DiamondStorage storage libStorage = LibDiamond
-            .diamondStorage();
-        require(
-            _amount >= libStorage.minPurchase,
-            "Below minimum purchase amount"
-        );
-        require(
-            _amount <= libStorage.maxPurchase,
-            "Exceeds maximum purchase amount"
-        );
-        require(
-            msg.value >= _amount * libStorage.presalePrice,
-            "Insufficient payment"
-        );
+        LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
+        require(_amount >= ds.minPurchase, "Below minimum purchase amount");
+        require(_amount <= ds.maxPurchase, "Exceeds maximum purchase amount");
+        require(msg.value >= _amount * ds.presalePrice, "Insufficient payment");
 
         for (uint256 i = 0; i < _amount; i++) {
-            ERC721Facet(address(this)).safeMint(
-                msg.sender,
-                libStorage.totalSupply
-            );
-            libStorage.totalSupply++;
+            ERC721Facet(address(this)).safeMint(msg.sender, ds.totalSupply);
+            ds.totalSupply++;
         }
     }
 }
